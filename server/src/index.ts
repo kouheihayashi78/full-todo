@@ -6,6 +6,11 @@ const app: Express = express();
 const PORT = 8080;
 const prisma = new PrismaClient();
 
+// ミドルウェアの追加
+// データをjsonデータとして解析、req.bodyに格納
+app.use(express.json());
+
+// 全件取得api
 app.get("/allTodos", async (req: Request, res: Response) => {
   try {
     const todoList = await prisma.todo.findMany();
@@ -13,6 +18,23 @@ app.get("/allTodos", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("データベースエラー:", error);
     return res.status(500).json({ error: "データベースエラーが発生しました" });
+  }
+});
+
+// todo登録api
+app.post("/createTodo", async (req: Request, res: Response) => {
+  try {
+    const { title, isCompleted } = req.body;
+    const createTodo = await prisma.todo.create({
+      data: {
+        title,
+        isCompleted,
+      }
+    });
+    return res.status(201).json(createTodo);
+  } catch (error) {
+    console.error("データベースエラー:", error);
+    return res.status(500).json({ error: "データベースエラーが発生しました"+ error });
   }
 });
 
