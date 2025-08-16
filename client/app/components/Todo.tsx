@@ -1,53 +1,10 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { TodoArray, TodoProps } from "./type";
 
-interface Todo {
-  id: number;
-  title: string;
-  isCompleted: boolean;
-}
-
-const Todo = () => {
-  const [todoList, setTodoList] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("http://localhost:8080/allTodos", {
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error("データの取得に失敗しました");
-        }
-
-        const data: Todo[] = await response.json();
-        setTodoList(data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "エラーが発生しました");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTodos();
-  }, []);
-
-  if (loading) {
-    return <div className="text-center py-8">読み込み中...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center py-8 text-red-600">エラー: {error}</div>;
-  }
-
+const Todo: React.FC<TodoArray> = ({ todos }) => {
   return (
     <ul className="divide-y divide-gray-200 px-4">
-      {todoList.map((todo: Todo) => (
+      {todos.map((todo: TodoProps) => (
         <li className="py-4" key={todo.id}>
           <div className="flex items-center justify-between">
             <div className="flex items-center">

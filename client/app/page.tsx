@@ -1,6 +1,46 @@
-import Todo from "@/app/components/Todo"
+"use client";
+import Todo from "@/app/components/Todo";
+import React, { useState, useEffect } from "react";
+import { TodoProps } from "./components/type";
 
 export default function Home() {
+  const [todos, setTodos] = useState<TodoProps[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:8080/allTodos", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("データの取得に失敗しました");
+        }
+
+        const data: TodoProps[] = await response.json();
+        setTodos(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "エラーが発生しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTodos();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8">読み込み中...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-red-600">エラー: {error}</div>;
+  }
+
   return (
     <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-32 py-4 px-4">
       <div className="px-4 py-2">
@@ -25,8 +65,7 @@ export default function Home() {
           </button>
         </div>
       </form>
-      
-      <Todo />
+      <Todo todos={todos} />
     </div>
   );
 }
