@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 
 interface Todo {
   id: number;
@@ -6,16 +7,43 @@ interface Todo {
   isCompleted: boolean;
 }
 
-const Todo = async () => {
-  const response = await fetch("http://localhost:8080/allTodos", {
-    cache: "no-store",
-  });
+const Todo = () => {
+  const [todoList, setTodoList] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!response.ok) {
-    throw new Error("データの取得に失敗しました");
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:8080/allTodos", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("データの取得に失敗しました");
+        }
+
+        const data: Todo[] = await response.json();
+        setTodoList(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "エラーが発生しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTodos();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8">読み込み中...</div>;
   }
 
-  const todoList: Todo[] = await response.json();
+  if (error) {
+    return <div className="text-center py-8 text-red-600">エラー: {error}</div>;
+  }
 
   return (
     <ul className="divide-y divide-gray-200 px-4">
