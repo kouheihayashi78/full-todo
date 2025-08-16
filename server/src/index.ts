@@ -1,6 +1,7 @@
 import express from "express";
 import type { Express, Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
+import cors from "cors"
 
 const app: Express = express();
 const PORT = 8080;
@@ -9,6 +10,12 @@ const prisma = new PrismaClient();
 // ミドルウェアの追加
 // データをjsonデータとして解析、req.bodyに格納
 app.use(express.json());
+
+// cors対策
+app.use(cors({
+  origin: "http://localhost:3000",
+  optionsSuccessStatus: 200
+}));
 
 // 全件取得api
 app.get("/allTodos", async (req: Request, res: Response) => {
