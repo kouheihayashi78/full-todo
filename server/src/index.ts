@@ -60,6 +60,21 @@ app.put("/updateTodo/:id", async (req: Request, res: Response) => {
   }
 });
 
+// todo削除api
+app.delete("/deleteTodo/:id", async (req: Request, res: Response) => {
+  try {
+    const id  = Number(req.params.id);
+    const deleteTodo = await prisma.todo.delete({
+      where: {
+        id
+      }
+    });
+    return res.status(200).json(deleteTodo);
+  } catch (error) {
+    console.error("データベースエラー:", error);
+    return res.status(500).json({ error: "データベースエラーが発生しました" + error });
+  }
+});
 
 // ローカルサーバー立ち上げ
 app
